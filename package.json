@@ -1,0 +1,41 @@
+{
+  "name": "zabo-sdk-react-native",
+  "version": "1.0.0",
+  "description": "Zabo SDK for React Native",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zabo-api/zabo-sdk-react-native.git"
+  },
+  "keywords": [
+    "zabo",
+    "cryptocurrency",
+    "wallets",
+    "bitcoin",
+    "ethereum",
+    "metamask",
+    "ledger",
+    "coinbase",
+    "binance",
+    "bitfinex",
+    "kraken",
+    "api"
+  ],
+  "author": "Zabo",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/zabo-api/zabo-sdk-react-native/issues"
+  },
+  "homepage": "https://github.com/zabo-api/zabo-sdk-react-native#readme",
+  "dependencies": {
+    "zabo-sdk-js": "^1.2.0"
+  },
+  "peerDependencies": {
+    "react-native": ">= 0.62.0",
+    "react-native-encrypted-storage": ">= 4.0.2",
+    "react-native-inappbrowser-reborn": ">= 3.5.1"
+  }
+}
