@@ -86,6 +86,12 @@ class API {
     try {
       await this.axios.head(`${this.connectUrl}/health-check`)
 
+      let redirectUri = ''
+      if (params && params.redirect_uri) {
+        redirectUri = params.redirect_uri
+        params.redirect_uri = encodeURIComponent(params.redirect_uri)
+      }
+
       const connectParams = {
         client_id: this.clientId,
         origin: encodeURIComponent(window.location.host),
@@ -103,8 +109,6 @@ class API {
       let url = `${this.connectUrl}/connect`
       url += (provider && typeof provider === 'string') ? `/${provider}` : ''
       url += `?${new URLSearchParams(connectParams).toString()}`
-
-      const redirectUri = params ? params.redirect_uri : ''
 
       this._isWaitingForConnector = true
       this._connectorClosed = false
