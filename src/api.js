@@ -17,7 +17,7 @@
  */
 'use strict'
 
-import { Linking } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import { InAppBrowser } from 'react-native-inappbrowser-reborn'
 import EncryptedStorage from 'react-native-encrypted-storage'
 import axios from 'axios'
@@ -29,10 +29,8 @@ import { SDKError } from '../node_modules/zabo-sdk-js/src/err'
 
 const CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
 const CONNECTION_FAILURE = 'CONNECTION_FAILURE'
-
 const DEBUG_REQUESTS = false
 
-// Main API class definition
 class API {
   constructor (options) {
     Object.assign(this, options)
@@ -45,7 +43,7 @@ class API {
 
     const urls = constants(this.baseUrl, this.connectUrl, this.apiVersion)[this.env]
     this._account = null
-    this._connectorClosed = true
+    this._isConnecting = false
     this.baseUrl = urls.API_BASE_URL
     this.axios = axios.create()
     this.axios.defaults.baseURL = this.baseUrl
@@ -67,9 +65,6 @@ class API {
 
     this._onConnectorMessage = this._onMessage.bind(this, 'connector')
     this._onSocketMessage = this._onMessage.bind(this, 'socket')
-
-    this._isConnecting = false
-    this._isWaitingForConnector = false
   }
 
   async connect ({ provider, params } = {}) {
@@ -110,9 +105,7 @@ class API {
       url += (provider && typeof provider === 'string') ? `/${provider}` : ''
       url += `?${new URLSearchParams(connectParams).toString()}`
 
-      this._isWaitingForConnector = true
-      this._connectorClosed = false
-      this._watchConnector(teamSession)
+      this._setListeners(teamSession)
       const data = await this.openUrl(url, redirectUri)
       if (data) {
         this._onMessage('connector', { data })
@@ -130,12 +123,15 @@ class API {
         }
         const res = await InAppBrowser.openAuth(url, redirectUri, options)
         if (res.type === 'success') {
-          return JSON.parse(utils.getUrlParam('account', res.url))
+          try {
+            return JSON.parse(utils.getUrlParam('account', res.url))
+          } catch (err) {
+            this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Could not parse session data' })
+          }
         } else if (res.type === 'cancel') {
           this._triggerCallback(CONNECTION_FAILURE, { error_type: 400, message: 'Connection closed' })
         }
       } else {
-        // TODO: implement open external browser workflow
         Linking.openURL(url)
       }
     } catch (err) {
@@ -176,32 +172,6 @@ class API {
     return { method, url, data, headers }
   }
 
-  _watchConnector (teamSession) {
-    this._setListeners(teamSession)
-
-    // Connector timeout (10 minutes)
-    const connectorTimeout = setTimeout(() => {
-      this._closeConnector()
-      this._triggerCallback(CONNECTION_FAILURE, { error_type: 400, message: 'Connection timeout' })
-    }, 10 * 60 * 1000)
-
-    // Watch interval
-    const watchInterval = setInterval(() => {
-      if (this._isWaitingForConnector) {
-        if (this._connectorClosed) {
-          this._closeConnector() // Ensure that the connector has been destroyed
-          this._triggerCallback(CONNECTION_FAILURE, { error_type: 400, message: 'Connection closed' })
-        }
-      } else {
-        this._removeListeners()
-        clearInterval(watchInterval)
-        clearTimeout(connectorTimeout)
-
-        this._closeConnector()
-      }
-    }, 1000)
-  }
-
   _setListeners (teamSession) {
     if (teamSession) {
       let wsUrl = this.baseUrl.replace('https://', 'wss://')
@@ -233,8 +203,6 @@ class API {
     if (data.zabo) {
       switch (data.eventName) {
         case 'connectSuccess': {
-          this._isWaitingForConnector = false
-
           if (data.account && data.account.token) {
             this._setSession(data.account)
           }
@@ -246,19 +214,26 @@ class API {
           }
 
           this._triggerCallback(CONNECTION_SUCCESS, data.account)
+
+          if (emitter === 'socket') {
+            this._removeListeners()
+            this._closeConnector()
+          }
           break
         }
 
         case 'connectError': {
-          if (emitter === 'connector') {
-            this._isWaitingForConnector = false
-          }
-
           this._triggerCallback(CONNECTION_FAILURE, data.error)
+
+          if (emitter === 'socket') {
+            this._removeListeners()
+            this._closeConnector()
+          }
           break
         }
 
         case 'connectClose': {
+          this._removeListeners()
           this._closeConnector()
           break
         }
@@ -282,9 +257,9 @@ class API {
       return this._account
     }
 
-    const _account = await EncryptedStorage.getItem('zabosession')
-    if (_account) {
-      this._account = JSON.parse(_account)
+    const account = await EncryptedStorage.getItem('zabosession')
+    if (account) {
+      this._account = JSON.parse(account)
     }
     return this._account
   }
@@ -295,12 +270,9 @@ class API {
   }
 
   _closeConnector () {
-    this._isWaitingForConnector = false
-
-    if (!this._connectorClosed) {
-      this._connectorClosed = true
-      setTimeout(InAppBrowser.closeAuth, 3000)
-    }
+    Platform.OS === 'android'
+      ? InAppBrowser.closeAuth()
+      : setTimeout(InAppBrowser.closeAuth, 3000)
   }
 
   _triggerCallback (type, data) {
