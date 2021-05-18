@@ -27,8 +27,9 @@ import resources from '../node_modules/zabo-sdk-js/src/resources'
 import utils from '../node_modules/zabo-sdk-js/src/utils'
 import { SDKError } from '../node_modules/zabo-sdk-js/src/err'
 
-const CONNECTION_SUCCESS = 'CONNECTION_SUCCESS'
-const CONNECTION_FAILURE = 'CONNECTION_FAILURE'
+import { getUrlParam } from './utils'
+import { CONNECTION_FAILURE, CONNECTION_SUCCESS } from './constants'
+
 const DEBUG_REQUESTS = false
 
 class API {
@@ -124,7 +125,7 @@ class API {
         const res = await InAppBrowser.openAuth(url, redirectUri, options)
         if (res.type === 'success') {
           try {
-            return JSON.parse(utils.getUrlParam('account', res.url))
+            return JSON.parse(getUrlParam('account', res.url))
           } catch (err) {
             this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Could not parse session data' })
           }
