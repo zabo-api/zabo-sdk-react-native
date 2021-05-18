@@ -45,6 +45,7 @@ class API {
     const urls = constants(this.baseUrl, this.connectUrl, this.apiVersion)[this.env]
     this._account = null
     this._isConnecting = false
+    this._isConnectorOpen = false
     this.baseUrl = urls.API_BASE_URL
     this.axios = axios.create()
     this.axios.defaults.baseURL = this.baseUrl
@@ -107,9 +108,16 @@ class API {
       url += `?${new URLSearchParams(connectParams).toString()}`
 
       this._setListeners(teamSession)
+      this._isConnectorOpen = true
       const data = await this.openUrl(url, redirectUri)
-      if (data) {
-        this._onMessage('connector', { data })
+      this._isConnectorOpen = false
+      // In case websocket fails
+      if (this._isConnecting) {
+        if (data) {
+          this._onMessage('connector', { data: { eventName: 'connectSuccess', zabo: true, account: { ...data } } })
+        } else {
+          this._onMessage('connector', { data: { eventName: 'connectError', zabo: true, error: { error_type: 500, message: 'Connection refused' } } })
+        }
       }
     } catch (err) {
       this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Connection refused' })
@@ -120,7 +128,8 @@ class API {
     try {
       if (await InAppBrowser.isAvailable()) {
         const options = {
-          ephemeralWebSession: false
+          ephemeralWebSession: false,
+          animated: false
         }
         const res = await InAppBrowser.openAuth(url, redirectUri, options)
         if (res.type === 'success') {
@@ -216,20 +225,16 @@ class API {
 
           this._triggerCallback(CONNECTION_SUCCESS, data.account)
 
-          if (emitter === 'socket') {
-            this._removeListeners()
-            this._closeConnector()
-          }
+          this._removeListeners()
+          this._closeConnector()
           break
         }
 
         case 'connectError': {
           this._triggerCallback(CONNECTION_FAILURE, data.error)
 
-          if (emitter === 'socket') {
-            this._removeListeners()
-            this._closeConnector()
-          }
+          this._removeListeners()
+          this._closeConnector()
           break
         }
 
@@ -271,9 +276,18 @@ class API {
   }
 
   _closeConnector () {
-    Platform.OS === 'android'
-      ? InAppBrowser.closeAuth()
-      : setTimeout(InAppBrowser.closeAuth, 3000)
+    // iOS: wait 5 seconds to close the connector in case it was not closed automatically by url redirect
+    if (Platform.OS === 'ios') {
+      clearTimeout(this._closeTimerId)
+      this._closeTimerId = setTimeout(() => {
+        this._isConnectorOpen && InAppBrowser.closeAuth()
+        this._isConnectorOpen = false
+      }, 5000)
+    // Android: setTimeout no longer works when app is in background
+    } else {
+      InAppBrowser.closeAuth()
+      this._isConnectorOpen = false
+    }
   }
 
   _triggerCallback (type, data) {
