@@ -19,7 +19,6 @@
 
 import { Linking, Platform } from 'react-native'
 import { InAppBrowser } from 'react-native-inappbrowser-reborn'
-import EncryptedStorage from 'react-native-encrypted-storage'
 import axios from 'axios'
 
 import constants from '../node_modules/zabo-sdk-js/src/constants'
@@ -78,6 +77,7 @@ class API {
       throw new SDKError(400, '[Zabo] `params` must be an object. More details at: https://zabo.com/docs/#new-account-connections')
     }
 
+    this._deleteAccountSession()
     this._isConnecting = true
 
     try {
@@ -152,7 +152,7 @@ class API {
   }
 
   async request (method, path, data, isPublic = false) {
-    const request = await this._buildRequest(method, path, data, isPublic)
+    const request = this._buildRequest(method, path, data, isPublic)
 
     try {
       const response = await this.axios(request)
@@ -169,9 +169,10 @@ class API {
     }
   }
 
-  async _buildRequest (method, path, data, isPublic) {
+  _buildRequest (method, path, data, isPublic) {
+    console.log('_buildRequest')
     const url = this.baseUrl + path
-    const _account = await this._getSession()
+    const _account = this._getAccountSession()
     let headers = {}
 
     if (!isPublic && _account) {
@@ -214,7 +215,7 @@ class API {
       switch (data.eventName) {
         case 'connectSuccess': {
           if (data.account && data.account.token) {
-            this._setSession(data.account)
+            this._setAccountSession(data.account)
           }
 
           if (this.resources.accounts && this.resources.transactions) {
@@ -253,26 +254,16 @@ class API {
     }
   }
 
-  async _setSession (account) {
+  _setAccountSession (account) {
     this._account = account
-    EncryptedStorage.setItem('zabosession', JSON.stringify(account))
   }
 
-  async _getSession () {
-    if (this._account) {
-      return this._account
-    }
-
-    const account = await EncryptedStorage.getItem('zabosession')
-    if (account) {
-      this._account = JSON.parse(account)
-    }
+  _getAccountSession () {
     return this._account
   }
 
-  async _deleteSession () {
+  _deleteAccountSession () {
     this._account = null
-    EncryptedStorage.removeItem('zabosession')
   }
 
   _closeConnector () {

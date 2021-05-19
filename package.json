@@ -35,7 +35,6 @@
   },
   "peerDependencies": {
     "react-native": ">= 0.62.0",
-    "react-native-encrypted-storage": ">= 4.0.2",
     "react-native-inappbrowser-reborn": ">= 3.5.1"
   }
 }
