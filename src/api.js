@@ -27,9 +27,7 @@ import utils from '../node_modules/zabo-sdk-js/src/utils'
 import { SDKError } from '../node_modules/zabo-sdk-js/src/err'
 
 import { getUrlParam } from './utils'
-import { CONNECTION_FAILURE, CONNECTION_SUCCESS } from './constants'
-
-const DEBUG_REQUESTS = false
+import { CONNECTION_FAILURE, CONNECTION_SUCCESS, DEBUG_REQUESTS } from './constants'
 
 class API {
   constructor (options) {
@@ -91,7 +89,7 @@ class API {
 
       const connectParams = {
         client_id: this.clientId,
-        origin: encodeURIComponent(window.location.host),
+        origin: 'zabo-sdk-react-native',
         zabo_env: this.env,
         zabo_version: this.apiVersion || process.env.PACKAGE_VERSION,
         ...(params || {}),
@@ -170,7 +168,6 @@ class API {
   }
 
   _buildRequest (method, path, data, isPublic) {
-    console.log('_buildRequest')
     const url = this.baseUrl + path
     const _account = this._getAccountSession()
     let headers = {}
@@ -191,7 +188,7 @@ class API {
       wsUrl += `&otp=${teamSession.one_time_password}`
 
       try {
-        this.ws = new window.WebSocket(wsUrl)
+        this.ws = new WebSocket(wsUrl)
         this.ws.onmessage = this._onSocketMessage
       } catch (err) {
         console.warn('[Zabo] Error establishing WebSocket connection.', err.message)
