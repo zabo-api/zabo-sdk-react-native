@@ -24,6 +24,8 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import Zabo from 'zabo-sdk-react-native'
+
 const App: () => React$Node = () => {
   return (
     <>
