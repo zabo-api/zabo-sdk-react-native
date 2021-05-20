@@ -34,7 +34,7 @@
     "buffer": "^6.0.3",
     "events": "^3.3.0",
     "stream": "0.0.2",
-    "zabo-sdk-js": "^1.2.0"
+    "zabo-sdk-js": "git://github.com/zabo-api/zabo-sdk-js.git#develop"
   },
   "peerDependencies": {
     "react-native": ">= 0.62.0",
