@@ -1,12 +1,4 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- * @flow strict-local
- */
-
-import React from 'react';
+import React, { useEffect, useState } from 'react'
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,103 +6,139 @@ import {
   View,
   Text,
   StatusBar,
-} from 'react-native';
-
-import {
-  Header,
-  LearnMoreLinks,
-  Colors,
-  DebugInstructions,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+  Image,
+  TouchableOpacity
+} from 'react-native'
 
 import Zabo from 'zabo-sdk-react-native'
 
-const App: () => React$Node = () => {
+const App = () => {
+  const [zabo, setZabo] = useState(null)
+  const [output, setOutput] = useState(null)
+
+  useEffect(() => {
+    setOutput('Loading SDk...')
+
+    const init = async () => {
+      try {
+        const zabo = await Zabo.init({
+          clientId: 'YOUR_CLIENT_ID',
+          baseUrl: 'https://api.zabo.com',
+          connectUrl: 'https://connect.zabo.com',
+          env: 'sandbox',
+          apiVersion: 'v1'
+        })
+
+        setZabo(zabo)
+        setOutput('SDk is ready')
+      } catch (err) {
+        console.log(err)
+        setOutput(`ERROR:\n${JSON.stringify(err)}`)
+      }
+    }
+
+    init()
+  }, [])
+
+  const handleConnect = () => {
+    const params = {
+      redirect_uri: 'zabo-app://connected',
+      origin: 'zabo-app'
+    }
+    zabo.connect({ params }).onConnection(account => {
+      setOutput(`CONNECTED!\nACCOUNT:\n${JSON.stringify(account)}`)
+    }).onError(err => {
+      console.log(err)
+      setOutput(`ERROR:\n${JSON.stringify(err)}`)
+    })
+  }
+
   return (
     <>
-      <StatusBar barStyle="dark-content" />
+      <StatusBar barStyle='dark-content' />
       <SafeAreaView>
         <ScrollView
-          contentInsetAdjustmentBehavior="automatic"
-          style={styles.scrollView}>
-          <Header />
-          {global.HermesInternal == null ? null : (
-            <View style={styles.engine}>
-              <Text style={styles.footer}>Engine: Hermes</Text>
-            </View>
-          )}
+          contentInsetAdjustmentBehavior='automatic'
+          style={styles.scrollView}
+        >
+          <View style={styles.header}>
+            <Image
+              source={require('./img/logo.png')}
+              resizeMode='contain'
+              style={styles.logo}
+            />
+            <Text style={styles.sectionTitle}>Zabo Connect Playground</Text>
+          </View>
           <View style={styles.body}>
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Step One</Text>
               <Text style={styles.sectionDescription}>
-                Edit <Text style={styles.highlight}>App.js</Text> to change this
-                screen and then come back to see your edits.
+                This is a <Text style={styles.highlight}>sandbox demo</Text> of Zabo Connect capabilities. Use this as a guideline to write your own production-ready code.
+              </Text>
+              <Text style={styles.sectionDescription}>
+                Please visit the Zabo SDK docs for a full API documentation and more details.
               </Text>
             </View>
             <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>See Your Changes</Text>
-              <Text style={styles.sectionDescription}>
-                <ReloadInstructions />
-              </Text>
+              <TouchableOpacity onPress={handleConnect} style={styles.button} disabled={!zabo}>
+                <Text style={styles.buttonText}>CONNECT</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Debug</Text>
-              <Text style={styles.sectionDescription}>
-                <DebugInstructions />
-              </Text>
-            </View>
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Learn More</Text>
-              <Text style={styles.sectionDescription}>
-                Read the docs to discover what to do next:
-              </Text>
-            </View>
-            <LearnMoreLinks />
+            { output && 
+              <View style={styles.sectionContainer}>
+                <Text>{output}</Text>
+              </View>
+            }
           </View>
         </ScrollView>
       </SafeAreaView>
     </>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
   scrollView: {
-    backgroundColor: Colors.lighter,
-  },
-  engine: {
-    position: 'absolute',
-    right: 0,
+    backgroundColor: '#efefef'
   },
   body: {
-    backgroundColor: Colors.white,
+    backgroundColor: '#ffffff'
   },
   sectionContainer: {
     marginTop: 32,
-    paddingHorizontal: 24,
+    paddingHorizontal: 24
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: '600',
-    color: Colors.black,
+    color: '#000000'
   },
   sectionDescription: {
     marginTop: 8,
     fontSize: 18,
     fontWeight: '400',
-    color: Colors.dark,
+    color: '#000000'
   },
   highlight: {
-    fontWeight: '700',
+    fontWeight: '700'
   },
-  footer: {
-    color: Colors.dark,
-    fontSize: 12,
+  header: {
+    backgroundColor: '#ffffff',
+    alignItems: 'center'
+  },
+  logo: {
+    width: 300,
+    height: 100
+  },
+  button: {
+    backgroundColor: '#3465E0',
+    marginVertical: 16,
+    padding: 16,
+    alignItems: 'center'
+  },
+  buttonText: {
+    fontSize: 16,
     fontWeight: '600',
-    padding: 4,
-    paddingRight: 12,
-    textAlign: 'right',
-  },
-});
+    color: '#fff'
+  }
+})
 
-export default App;
+export default App
