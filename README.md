@@ -1,6 +1,6 @@
 What is Zabo? A unified cryptocurrency API.
 =========================
-[![CircleCI](https://circleci.com/gh/zabo-api/zabo-sdk-js/tree/master.svg?style=svg)](https://circleci.com/gh/zabo-api/zabo-sdk-js/tree/master)
+[![CircleCI](https://circleci.com/gh/zabo-api/zabo-sdk-react-native/tree/master.svg?style=svg)](https://circleci.com/gh/zabo-api/zabo-sdk-react-native/tree/master)
 [![Discord](https://img.shields.io/discord/533336922970521600)](https://discord.gg/vGHYuUT)
 [![Discourse](https://img.shields.io/discourse/https/forum.zabo.com/status)](https://forum.zabo.com)   
 
