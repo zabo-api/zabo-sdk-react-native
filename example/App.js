@@ -22,11 +22,11 @@ const App = () => {
     const init = async () => {
       try {
         const zabo = await Zabo.init({
-          clientId: 'YOUR_CLIENT_ID',
-          baseUrl: 'https://api.zabo.com',
-          connectUrl: 'https://connect.zabo.com',
-          env: 'sandbox',
-          apiVersion: 'v1'
+          clientId: '99E88F9AbF8d4eAf4D59f83c3DA47C97233D97FFBB08F47F4b8Ec29D28eaE193', // REQUIRED
+          env: 'sandbox', // REQUIRED
+          baseUrl: 'https://api.zabo.com', // OPTIONAL
+          connectUrl: 'https://connect.zabo.com', // OPTIONAL
+          apiVersion: 'v1' // OPTIONAL
         })
 
         setZabo(zabo)
@@ -42,8 +42,8 @@ const App = () => {
 
   const handleConnect = () => {
     const params = {
-      redirect_uri: 'zabo-app://connected',
-      origin: 'zabo-app'
+      redirect_uri: 'zabo-app://connected', // OPTIONAL
+      origin: 'zabo-app' // OPTIONAL
     }
     zabo.connect({ params }).onConnection(account => {
       setOutput(`CONNECTED!\nACCOUNT:\n${JSON.stringify(account)}`)
@@ -83,11 +83,10 @@ const App = () => {
                 <Text style={styles.buttonText}>CONNECT</Text>
               </TouchableOpacity>
             </View>
-            { output && 
+            {output &&
               <View style={styles.sectionContainer}>
                 <Text>{output}</Text>
-              </View>
-            }
+              </View>}
           </View>
         </ScrollView>
       </SafeAreaView>

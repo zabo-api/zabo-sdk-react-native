@@ -46,7 +46,7 @@ zabo-sdk-react-native uses websocket to receive the connection success or connec
 | Param      | Default                  | Description                                                                             | Required |
 |------------|--------------------------|-----------------------------------------------------------------------------------------|----------|
 | clientId   |                          | App Key acquired when registering a team in  [Zabo Dashboard](https://zabo.com/login/). | Yes      |
-| env        | live                     | `sandbox` or `live`                                                                     | No       |
+| env        |                          | `sandbox` or `live`                                                                     | Yes      |
 | apiVersion | v1                       | `v0` or `v1`                                                                            | No       |
 | baseUrl    | https://api.zabo.com     | API url                                                                                 | No       |
 | connectUrl | https://connect.zabo.com | Connect Widget URL                                                                      | No       |
@@ -55,7 +55,7 @@ zabo-sdk-react-native uses websocket to receive the connection success or connec
 | Param        | Default                  | Description                              | Required |
 |--------------|--------------------------|------------------------------------------|----------|
 | redirect_uri |                          | Url to be redirected after login success | No       |
-| origin       | zabo-app                 | Identification of connection origin      | No       |
+| origin       | zabo-sdk-react-native    | Identification of connection origin      | No       |
 
 ## Usage
 ```JS
