@@ -16,6 +16,9 @@ The Zabo SDK for React Native provides convenient access to the Zabo API for mob
 
 Please keep in mind that [you must register](https://zabo.com/login) and receive a team id to use in your client application, or if you are using the server side functions, [generate an API keypair from your dashboard](https://zabo.com/dashboard).
 
+![Example 1](example/img/screenshot-1.png)
+![Example 2](example/img/screenshot-2.png)
+
 ## Documentation
 See the [Zabo API docs](https://zabo.com/docs).
 
