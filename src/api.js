@@ -91,7 +91,7 @@ class API {
         client_id: this.clientId,
         origin: 'zabo-sdk-react-native',
         zabo_env: this.env,
-        zabo_version: this.apiVersion || process.env.PACKAGE_VERSION,
+        zabo_version: this.apiVersion || 'v1',
         ...(params || {}),
         navbar: false
       }
