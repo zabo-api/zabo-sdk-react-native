@@ -66,7 +66,6 @@ import { SafeAreaView, StyleSheet, ScrollView, View, Text, TouchableOpacity } fr
 import Zabo from 'zabo-sdk-react-native'
 
 const App = () => {
-  const [zabo, setZabo] = useState(null)
   const [output, setOutput] = useState(null)
 
   useEffect(() => {
@@ -74,7 +73,7 @@ const App = () => {
 
     const init = async () => {
       try {
-        const zabo = await Zabo.init({
+        await Zabo.init({
           clientId: 'YOUR_CLIENT_ID',
           baseUrl: 'https://api.zabo.com',
           connectUrl: 'https://connect.zabo.com',
@@ -82,7 +81,6 @@ const App = () => {
           apiVersion: 'v1'
         })
 
-        setZabo(zabo)
         setOutput('SDk is ready')
       } catch (err) {
         setOutput(`ERROR:\n${JSON.stringify(err)}`)
@@ -93,6 +91,7 @@ const App = () => {
   }, [])
 
   const handleConnect = () => {
+    const zabo = Zabo.instance
     const params = {
       redirect_uri: 'zabo-app://connected', // OPTIONAL
       origin: 'zabo-app'                    // OPTIONAL
@@ -109,7 +108,7 @@ const App = () => {
       <SafeAreaView>
         <ScrollView>
           <View style={styles.sectionContainer}>
-            <TouchableOpacity onPress={handleConnect} style={styles.button} disabled={!zabo}>
+            <TouchableOpacity onPress={handleConnect} style={styles.button}>
               <Text style={styles.buttonText}>CONNECT</Text>
             </TouchableOpacity>
           </View>

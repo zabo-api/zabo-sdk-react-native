@@ -13,7 +13,6 @@ import {
 import Zabo from 'zabo-sdk-react-native'
 
 const App = () => {
-  const [zabo, setZabo] = useState(null)
   const [output, setOutput] = useState(null)
 
   useEffect(() => {
@@ -21,7 +20,7 @@ const App = () => {
 
     const init = async () => {
       try {
-        const zabo = await Zabo.init({
+        await Zabo.init({
           clientId: '99E88F9AbF8d4eAf4D59f83c3DA47C97233D97FFBB08F47F4b8Ec29D28eaE193', // REQUIRED
           env: 'sandbox', // REQUIRED
           baseUrl: 'https://api.zabo.com', // OPTIONAL
@@ -29,10 +28,8 @@ const App = () => {
           apiVersion: 'v1' // OPTIONAL
         })
 
-        setZabo(zabo)
         setOutput('SDk is ready')
       } catch (err) {
-        console.log(err)
         setOutput(`ERROR:\n${JSON.stringify(err)}`)
       }
     }
@@ -41,6 +38,7 @@ const App = () => {
   }, [])
 
   const handleConnect = () => {
+    const zabo = Zabo.instance
     const params = {
       redirect_uri: 'zabo-app://connected', // OPTIONAL
       origin: 'zabo-app' // OPTIONAL
@@ -48,7 +46,6 @@ const App = () => {
     zabo.connect({ params }).onConnection(account => {
       setOutput(`CONNECTED!\nACCOUNT:\n${JSON.stringify(account)}`)
     }).onError(err => {
-      console.log(err)
       setOutput(`ERROR:\n${JSON.stringify(err)}`)
     })
   }
@@ -79,7 +76,7 @@ const App = () => {
               </Text>
             </View>
             <View style={styles.sectionContainer}>
-              <TouchableOpacity onPress={handleConnect} style={styles.button} disabled={!zabo}>
+              <TouchableOpacity onPress={handleConnect} style={styles.button}>
                 <Text style={styles.buttonText}>CONNECT</Text>
               </TouchableOpacity>
             </View>
