@@ -1,6 +1,6 @@
 {
   "name": "zabo-sdk-react-native",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "Zabo SDK for React Native",
   "main": "index.js",
   "scripts": {
@@ -33,8 +33,11 @@
   "dependencies": {
     "buffer": "^6.0.3",
     "events": "^3.3.0",
-    "react-native-inappbrowser-reborn": ">= 3.5.1",
     "stream": "0.0.2",
     "zabo-sdk-js": "^1.3.0"
+  },
+    "peerDependencies": {
+    "react-native": ">= 0.62.0",
+    "react-native-inappbrowser-reborn": ">= 3.5.1"
   }
 }
