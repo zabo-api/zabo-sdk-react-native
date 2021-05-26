@@ -17,7 +17,7 @@
 'use strict'
 
 import API from './api'
-import ZaboSDK from '../node_modules/zabo-sdk-js/src/core/SDK'
+import ZaboSDK from 'zabo-sdk-js/src/core/SDK'
 
 class SDK extends ZaboSDK {
   async initAPI (params) {
