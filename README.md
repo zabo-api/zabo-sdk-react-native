@@ -28,12 +28,7 @@ npm install zabo-sdk-react-native --save
 ```
 
 ## Requirements
-### react-native-inappbrowser-reborn
-[react-native-inappbrowser-reborn](https://github.com/proyecto26/react-native-inappbrowser) is a dependency for this package that you'll need to add to your project. 
-
-This package provides access to the system's web browser and supports handling redirects with Chrome Custom Tabs for Android and SafariServices/AuthenticationServices for iOS.
-
-To install, follow the [documentation](https://github.com/proyecto26/react-native-inappbrowser#getting-started)
+TODO
 
 ## Configuration
 ### Configure Deep Linking (Optional)

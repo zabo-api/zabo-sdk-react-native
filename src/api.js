@@ -18,8 +18,9 @@
 'use strict'
 
 import { Linking, Platform } from 'react-native'
-import { InAppBrowser } from 'react-native-inappbrowser-reborn'
 import axios from 'axios'
+
+import { ConnectWidget } from 'zabo-sdk-react-native'
 
 import constants from 'zabo-sdk-js/src/constants'
 import resources from 'zabo-sdk-js/src/resources'
@@ -118,18 +119,19 @@ class API {
         }
       }
     } catch (err) {
+      console.log(err)
       this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Connection refused' })
     }
   }
 
   async openUrl (url = '', redirectUri = '') {
     try {
-      if (await InAppBrowser.isAvailable()) {
+      if (await ConnectWidget.isAvailable()) {
         const options = {
           ephemeralWebSession: false,
           animated: false
         }
-        const res = await InAppBrowser.openAuth(url, redirectUri, options)
+        const res = await ConnectWidget.openAuth(url, redirectUri, options)
         if (res.type === 'success') {
           try {
             return JSON.parse(getUrlParam('account', res.url))
@@ -268,12 +270,12 @@ class API {
     if (Platform.OS === 'ios') {
       clearTimeout(this._closeTimerId)
       this._closeTimerId = setTimeout(() => {
-        this._isConnectorOpen && InAppBrowser.closeAuth()
+        this._isConnectorOpen && ConnectWidget.closeAuth()
         this._isConnectorOpen = false
       }, 5000)
     // Android: setTimeout no longer works when app is in background
     } else {
-      InAppBrowser.closeAuth()
+      ConnectWidget.closeAuth()
       this._isConnectorOpen = false
     }
   }
