@@ -17,18 +17,25 @@
  */
 'use strict'
 
-import { Linking, Platform } from 'react-native'
+import { Linking, NativeModules, Platform } from 'react-native'
 import axios from 'axios'
-
-import { ConnectWidget } from 'zabo-sdk-react-native'
 
 import constants from 'zabo-sdk-js/src/constants'
 import resources from 'zabo-sdk-js/src/resources'
 import utils from 'zabo-sdk-js/src/utils'
 import { SDKError } from 'zabo-sdk-js/src/err'
 
-import { getUrlParam } from './utils'
+import {
+  getUrlParam,
+  authSessionIsNativelySupported,
+  openAuthSessionAsync,
+  openAuthSessionPolyfillAsync,
+  closeAuthSessionPolyfillAsync
+} from './utils'
+
 import { CONNECTION_FAILURE, CONNECTION_SUCCESS, DEBUG_REQUESTS } from './constants'
+
+const { RNInAppBrowser } = NativeModules
 
 class API {
   constructor (options) {
@@ -126,12 +133,12 @@ class API {
 
   async openUrl (url = '', redirectUri = '') {
     try {
-      if (await ConnectWidget.isAvailable()) {
+      if (await this._isConnectAvailable()) {
         const options = {
           ephemeralWebSession: false,
           animated: false
         }
-        const res = await ConnectWidget.openAuth(url, redirectUri, options)
+        const res = await this._openAuth(url, redirectUri, options)
         if (res.type === 'success') {
           try {
             return JSON.parse(getUrlParam('account', res.url))
@@ -145,6 +152,7 @@ class API {
         Linking.openURL(url)
       }
     } catch (err) {
+      console.log(err)
       this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Could not open the Connection Widget' })
     }
 
@@ -270,12 +278,12 @@ class API {
     if (Platform.OS === 'ios') {
       clearTimeout(this._closeTimerId)
       this._closeTimerId = setTimeout(() => {
-        this._isConnectorOpen && ConnectWidget.closeAuth()
+        this._isConnectorOpen && this._closeAuth()
         this._isConnectorOpen = false
       }, 5000)
     // Android: setTimeout no longer works when app is in background
     } else {
-      ConnectWidget.closeAuth()
+      this._closeAuth()
       this._isConnectorOpen = false
     }
   }
@@ -291,6 +299,27 @@ class API {
       if (type === CONNECTION_FAILURE && this._onError) {
         this._onError(data)
       }
+    }
+  }
+
+  async _isConnectAvailable () {
+    return RNInAppBrowser.isAvailable()
+  }
+
+  async _openAuth (url, redirectUrl, options) {
+    if (authSessionIsNativelySupported()) {
+      return openAuthSessionAsync(url, redirectUrl, options)
+    }
+
+    return openAuthSessionPolyfillAsync(url, redirectUrl, options)
+  }
+
+  async _closeAuth () {
+    closeAuthSessionPolyfillAsync()
+    if (authSessionIsNativelySupported()) {
+      RNInAppBrowser.closeAuth()
+    } else {
+      RNInAppBrowser.close()
     }
   }
 }

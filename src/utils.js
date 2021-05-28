@@ -19,7 +19,7 @@ import type {
   InAppBrowserOptions
 } from './types';
 
-export const ZaboSdkReactNative = NativeModules.ZaboSdkReactNative;
+export const RNInAppBrowser = NativeModules.RNInAppBrowser;
 
 let _redirectHandler: ?(event: RedirectEvent) => void;
 
@@ -85,7 +85,7 @@ export async function openBrowserAsync(
     enableBarCollapsing: false
   }
 ): Promise<BrowserResult> {
-  return ZaboSdkReactNative.open({
+  return RNInAppBrowser.open({
     ...options,
     url,
     preferredBarTintColor:
@@ -104,7 +104,7 @@ export async function openAuthSessionAsync(
     ephemeralWebSession: false
   }
 ): Promise<AuthSessionResult> {
-  return ZaboSdkReactNative.openAuth(
+  return RNInAppBrowser.openAuth(
     url,
     redirectUrl,
     options
@@ -130,7 +130,7 @@ export async function openAuthSessionPolyfillAsync(
     ]);
   } finally {
     closeAuthSessionPolyfillAsync();
-    ZaboSdkReactNative.close();
+    RNInAppBrowser.close();
   }
   return response;
 }

@@ -16,19 +16,8 @@
 
 'use strict'
 
-import { NativeModules } from 'react-native'
 import sdk from './sdk'
 import { version } from '../package.json'
-import { 
-  authSessionIsNativelySupported,
-  openAuthSessionAsync,
-  openAuthSessionPolyfillAsync,
-  closeAuthSessionPolyfillAsync
-} from './utils'
-
-const { ZaboSdkReactNative } = NativeModules
-
-console.log('ZaboSdkReactNative', ZaboSdkReactNative)
 
 class Zabo {
   async init (config = {}) {
@@ -43,33 +32,6 @@ class Zabo {
   get version () {
     return version
   }
-}
-
-async function isAvailable() {
-  return ZaboSdkReactNative.isAvailable()
-}
-
-async function openAuth(url, redirectUrl, options) {
-  if (authSessionIsNativelySupported()) {
-    return openAuthSessionAsync(url, redirectUrl, options)
-  } else {
-    return openAuthSessionPolyfillAsync(url, redirectUrl, options)
-  }
-}
-
-function closeAuth() {
-  closeAuthSessionPolyfillAsync()
-  if (authSessionIsNativelySupported()) {
-    ZaboSdkReactNative.closeAuth()
-  } else {
-    ZaboSdkReactNative.close()
-  }
-}
-
-export const ConnectWidget = {
-  isAvailable,
-  openAuth,
-  closeAuth
 }
 
 export default new Zabo()
