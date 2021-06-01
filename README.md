@@ -21,24 +21,51 @@ Please keep in mind that [you must register](https://zabo.com/login) and receive
 ## Documentation
 See the [Zabo API docs](https://zabo.com/docs).
 
+## Requirements
+- React Native >= 0.62
+
 ## Installation
-As a package:
 ```
 npm install zabo-sdk-react-native --save
 ```
 
-## Requirements
-TODO
+**iOS Platform:**
+Install pod
+```
+cd ios && pod install && cd ..
+```
+
+**Android Platform:**
+You are set!
 
 ## Configuration
-### Configure Deep Linking (Optional)
-zabo-sdk-react-native uses websocket to receive the connection success or connection error callbacks in the app. Optionally, you configure a deep link to your app in order to have a better user experience, and in case the websocket connection fails.
+zabo-sdk-react-native uses the library react-native-inappbrowser in background, and some extra configuration may be required.
+
+It supports [Chrome Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/#whatarethey) for Android and [SafariServices](https://developer.apple.com/documentation/safariservices)/[AuthenticationServices](https://developer.apple.com/documentation/authenticationservices) for iOS.
+
+With this approach, you will keep your app much more safe!
+
+For more information, please visit [react-native-inappbrowser](https://github.com/proyecto26/react-native-inappbrowser)
+
+### Configure Android Launch Mode
+Configure Application launch mode as single task:
+```XML
+<application
+  ...
+  android:launchMode="singleTask">
+  ...
+</application>
+```
+
+### Configure Deep Linking
+zabo-sdk-react-native uses websocket to receive the connection success or connection error callbacks in the app. You can configure a custom link scheme to your app in order to have a better user experience.
 
 **1. Enable Deep Linking:** Follow the instructions at [React Native Linking](https://reactnative.dev/docs/linking#enabling-deep-links) documentation. You can create any scheme you desire. We are using `zabo-app`in our examples.
 
 **2. Configure Redirect URI:** On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console:
 ![Redirect URI](https://zabo.com/docs/images/query-param-example.png)
 
+## Usage
 ### Zabo.init() parameters
 | Param      | Default                  | Description                                                                             | Required |
 |------------|--------------------------|-----------------------------------------------------------------------------------------|----------|
@@ -54,7 +81,7 @@ zabo-sdk-react-native uses websocket to receive the connection success or connec
 | redirect_uri |                          | Url to be redirected after login success | No       |
 | origin       | zabo-sdk-react-native    | Identification of connection origin      | No       |
 
-## Usage
+### Example
 ```JS
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, StyleSheet, ScrollView, View, Text, TouchableOpacity } from 'react-native'
@@ -160,8 +187,6 @@ Zabo.init({
   console.log(e.message)
 })
 ```
-
-
 
 ### Server vs Client
 The SDK can be used in either the client or server environment after a user connects their wallet, however, they have different functions available to them and utilize different authentication methods. See [the Zabo API docs](https://zabo.com/docs) for more information.

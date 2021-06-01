@@ -28,7 +28,6 @@
             <data android:scheme="zabo-app" android:host="connected" android:pathPrefix="" />
         </intent-filter>
       </activity>
-      <activity android:name="com.facebook.react.devsupport.DevSettingsActivity" />
     </application>
 
 </manifest>
