@@ -1,4 +1,4 @@
-#import "ZaboSdkReactNative.h"
+#import "RNInAppBrowser.h"
 
 #if __has_include(<React/RCTUtils.h>) // React Native >= 0.40
 #import <React/RCTUtils.h>
@@ -18,16 +18,16 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpartial-availability"
 #if defined(__IPHONE_OS_VERSION_MAX_ALLOWED) && defined(__IPHONE_13_0) && __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_13_0
-@interface ZaboSdkReactNative () <SFSafariViewControllerDelegate, ASWebAuthenticationPresentationContextProviding, UIAdaptivePresentationControllerDelegate>
+@interface RNInAppBrowser () <SFSafariViewControllerDelegate, ASWebAuthenticationPresentationContextProviding, UIAdaptivePresentationControllerDelegate>
 #else
-@interface ZaboSdkReactNative () <SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate>
+@interface RNInAppBrowser () <SFSafariViewControllerDelegate, UIAdaptivePresentationControllerDelegate>
 #endif
 @end
 #pragma clang diagnostic pop
 
-NSString *ZaboSdkReactNativeErrorCode = @"ZaboSdkReactNative";
+NSString *RNInAppBrowserErrorCode = @"RNInAppBrowser";
 
-@implementation ZaboSdkReactNative
+@implementation RNInAppBrowser
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wpartial-availability"
@@ -90,17 +90,15 @@ RCT_EXPORT_METHOD(openAuth:(NSString *)authURL
       }
     };
 
-    NSString *escapedRedirectURL = [redirectURL stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-    
     if (@available(iOS 12.0, *)) {
       webAuthSession = [[ASWebAuthenticationSession alloc]
         initWithURL:url
-        callbackURLScheme:escapedRedirectURL
+        callbackURLScheme:redirectURL
         completionHandler:completionHandler];
     } else {
       authSession = [[SFAuthenticationSession alloc]
         initWithURL:url
-        callbackURLScheme:escapedRedirectURL
+        callbackURLScheme:redirectURL
         completionHandler:completionHandler];
     }
 
@@ -274,7 +272,7 @@ RCT_EXPORT_METHOD(isAvailable:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromi
  */
 - (BOOL)initializeWebBrowserWithResolver:(RCTPromiseResolveBlock)resolve andRejecter:(RCTPromiseRejectBlock)reject {
   if (redirectResolve) {
-    reject(ZaboSdkReactNativeErrorCode, @"Another InAppBrowser is already being presented.", nil);
+    reject(RNInAppBrowserErrorCode, @"Another InAppBrowser is already being presented.", nil);
     return NO;
   }
   redirectReject = reject;
