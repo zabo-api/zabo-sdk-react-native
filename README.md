@@ -39,13 +39,11 @@ cd ios && pod install && cd ..
 You are set!
 
 ## Configuration
-zabo-sdk-react-native uses the library react-native-inappbrowser in background, and some extra configuration may be required.
+Zabo SDK React Native was inspired in the library [React Native In App Browser](https://github.com/proyecto26/react-native-inappbrowser). 
 
 It supports [Chrome Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/#whatarethey) for Android and [SafariServices](https://developer.apple.com/documentation/safariservices)/[AuthenticationServices](https://developer.apple.com/documentation/authenticationservices) for iOS.
 
-With this approach, you will keep your app much more safe!
-
-For more information, please visit [react-native-inappbrowser](https://github.com/proyecto26/react-native-inappbrowser)
+Some extra configuration are necessary:
 
 ### Configure Android Launch Mode
 Configure Application launch mode as single task:
@@ -152,7 +150,6 @@ export default App
 ```
 
 ### After connecting
-After a user connects, the client SDK can be used for the connected wallet:
 ```js
 zabo.transactions.getList({ ticker: 'ETH' }).then(history => {
   console.log(history)
@@ -161,33 +158,6 @@ zabo.transactions.getList({ ticker: 'ETH' }).then(history => {
   console.error(error)
 })
 ```
-Or you can send the account to your server for the server-side SDK to create a unique user:
-```js
-zabo.connect().onConnection(account => {
-  sendToYourServer(account)
-}).onError(error => {
-  console.error('account connection error:', error.message)
-})
-```
-
-Then in your server
-```js
-const Zabo = require('zabo-sdk-js')
-let account = accountReceivedFromTheClient
-
-Zabo.init({
-  apiKey: 'YourPublicAPIKeyGeneratedInYourZaboDotComDashboard',
-  secretKey: 'YourSecretAPIKey',
-  env: 'sandbox'
-}).then(zabo => {
-  zabo.users.create(account)
-}).catch(e => {
-  console.log(e.message)
-})
-```
-
-### Server vs Client
-The SDK can be used in either the client or server environment after a user connects their wallet, however, they have different functions available to them and utilize different authentication methods. See [the Zabo API docs](https://zabo.com/docs) for more information.
 
 ### Using Promises
 Every method returns a chainable promise which can be used:
