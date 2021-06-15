@@ -1,0 +1,78 @@
+version: 2
+jobs:
+  checkout:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:12
+      
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+            - v1-repo-
+
+      - checkout
+
+      - save_cache:
+          key: v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+          paths:
+            - ~/repo
+
+  build:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:12
+
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+            - v1-dependencies-
+      
+      - run:
+          name: "Install tools"
+          command: sudo apt-get update && sudo apt-get install -y python-dev moreutils
+
+      - run: npm ci
+
+      - save_cache:
+          paths:
+            - ~/repo/node_modules
+            - ~/repo/awsdir
+          key: v1-dependencies-{{ checksum "package-lock.json" }}
+  
+  test:
+    working_directory: ~/repo
+    docker:
+      - image: circleci/node:12
+
+    steps:
+      - restore_cache:
+          keys:
+            - v1-repo-{{ .Environment.CIRCLE_SHA1 }}
+
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "package-lock.json" }}
+
+      - restore_cache:
+          keys:
+            - v1-{{ .Environment.CIRCLE_BRANCH }}-{{ .Environment.CIRCLE_SHA1 }}
+
+      - run: npm run test
+
+workflows:
+  version: 2
+  build-test:
+    jobs:
+      - checkout
+      - build:
+          requires:
+            - checkout
+      - test:
+          requires:
+            - build
