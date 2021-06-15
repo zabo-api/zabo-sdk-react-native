@@ -1,24 +1,6 @@
-/**
- * @Copyright (c) 2019-present, Zabo & Modular, Inc. All rights reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @description: Zabo API communication library
- */
 'use strict'
 
-import { Linking, Platform } from 'react-native'
-import { InAppBrowser } from 'react-native-inappbrowser-reborn'
+import { Linking, NativeModules, Platform } from 'react-native'
 import axios from 'axios'
 
 import constants from 'zabo-sdk-js/src/constants'
@@ -26,8 +8,17 @@ import resources from 'zabo-sdk-js/src/resources'
 import utils from 'zabo-sdk-js/src/utils'
 import { SDKError } from 'zabo-sdk-js/src/err'
 
-import { getUrlParam } from './utils'
+import {
+  getUrlParam,
+  authSessionIsNativelySupported,
+  openAuthSessionAsync,
+  openAuthSessionPolyfillAsync,
+  closeAuthSessionPolyfillAsync
+} from './utils'
+
 import { CONNECTION_FAILURE, CONNECTION_SUCCESS, DEBUG_REQUESTS } from './constants'
+
+const { RNInAppBrowser } = NativeModules
 
 class API {
   constructor (options) {
@@ -118,18 +109,19 @@ class API {
         }
       }
     } catch (err) {
+      console.log(err)
       this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Connection refused' })
     }
   }
 
   async openUrl (url = '', redirectUri = '') {
     try {
-      if (await InAppBrowser.isAvailable()) {
+      if (await this._isConnectAvailable()) {
         const options = {
           ephemeralWebSession: false,
           animated: false
         }
-        const res = await InAppBrowser.openAuth(url, redirectUri, options)
+        const res = await this._openAuth(url, redirectUri, options)
         if (res.type === 'success') {
           try {
             return JSON.parse(getUrlParam('account', res.url))
@@ -143,6 +135,7 @@ class API {
         Linking.openURL(url)
       }
     } catch (err) {
+      console.log(err)
       this._triggerCallback(CONNECTION_FAILURE, { error_type: 500, message: 'Could not open the Connection Widget' })
     }
 
@@ -268,12 +261,12 @@ class API {
     if (Platform.OS === 'ios') {
       clearTimeout(this._closeTimerId)
       this._closeTimerId = setTimeout(() => {
-        this._isConnectorOpen && InAppBrowser.closeAuth()
+        this._isConnectorOpen && this._closeAuth()
         this._isConnectorOpen = false
       }, 5000)
     // Android: setTimeout no longer works when app is in background
     } else {
-      InAppBrowser.closeAuth()
+      this._closeAuth()
       this._isConnectorOpen = false
     }
   }
@@ -289,6 +282,27 @@ class API {
       if (type === CONNECTION_FAILURE && this._onError) {
         this._onError(data)
       }
+    }
+  }
+
+  async _isConnectAvailable () {
+    return RNInAppBrowser.isAvailable()
+  }
+
+  async _openAuth (url, redirectUrl, options) {
+    if (authSessionIsNativelySupported()) {
+      return openAuthSessionAsync(url, redirectUrl, options)
+    }
+
+    return openAuthSessionPolyfillAsync(url, redirectUrl, options)
+  }
+
+  async _closeAuth () {
+    closeAuthSessionPolyfillAsync()
+    if (authSessionIsNativelySupported()) {
+      RNInAppBrowser.closeAuth()
+    } else {
+      RNInAppBrowser.close()
     }
   }
 }

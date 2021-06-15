@@ -23,8 +23,6 @@ const App = () => {
         await Zabo.init({
           clientId: '7uoeGj0Ei06SrOVbFe0BxztRHELAH9JWLIjXHh9vm0HmSrBbmhkHb9DdP7vgYB0Y', // REQUIRED
           env: 'sandbox', // REQUIRED
-          baseUrl: 'https://api.zabo.com', // OPTIONAL
-          connectUrl: 'https://connect.zabo.com', // OPTIONAL
           apiVersion: 'v1' // OPTIONAL
         })
 

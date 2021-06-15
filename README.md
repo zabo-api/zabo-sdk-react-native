@@ -21,37 +21,55 @@ Please keep in mind that [you must register](https://zabo.com/login) and receive
 ## Documentation
 See the [Zabo API docs](https://zabo.com/docs).
 
+## Requirements
+- React Native >= 0.62
+
 ## Installation
-As a package:
 ```
 npm install zabo-sdk-react-native --save
 ```
 
-## Requirements
-### react-native-inappbrowser-reborn
-[react-native-inappbrowser-reborn](https://github.com/proyecto26/react-native-inappbrowser) is a dependency for this package that you'll need to add to your project. 
+**iOS Platform:**
+Install pod
+```
+cd ios && pod install && cd ..
+```
 
-This package provides access to the system's web browser and supports handling redirects with Chrome Custom Tabs for Android and SafariServices/AuthenticationServices for iOS.
-
-To install, follow the [documentation](https://github.com/proyecto26/react-native-inappbrowser#getting-started)
+**Android Platform:**
+You are set!
 
 ## Configuration
-### Configure Deep Linking (Optional)
-zabo-sdk-react-native uses websocket to receive the connection success or connection error callbacks in the app. Optionally, you configure a deep link to your app in order to have a better user experience, and in case the websocket connection fails.
+Zabo SDK React Native was inspired in the library [React Native In App Browser](https://github.com/proyecto26/react-native-inappbrowser). 
+
+It supports [Chrome Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/#whatarethey) for Android and [SafariServices](https://developer.apple.com/documentation/safariservices)/[AuthenticationServices](https://developer.apple.com/documentation/authenticationservices) for iOS.
+
+Some extra configuration are necessary:
+
+### Configure Android Launch Mode
+Configure Application launch mode as single task:
+```XML
+<application
+  ...
+  android:launchMode="singleTask">
+  ...
+</application>
+```
+
+### Configure Deep Linking
+zabo-sdk-react-native uses websocket to receive the connection success or connection error callbacks in the app. You can configure a custom link scheme to your app in order to have a better user experience.
 
 **1. Enable Deep Linking:** Follow the instructions at [React Native Linking](https://reactnative.dev/docs/linking#enabling-deep-links) documentation. You can create any scheme you desire. We are using `zabo-app`in our examples.
 
 **2. Configure Redirect URI:** On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console:
 ![Redirect URI](https://zabo.com/docs/images/query-param-example.png)
 
+## Usage
 ### Zabo.init() parameters
 | Param      | Default                  | Description                                                                             | Required |
 |------------|--------------------------|-----------------------------------------------------------------------------------------|----------|
 | clientId   |                          | App Key acquired when registering a team in  [Zabo Dashboard](https://zabo.com/login/). | Yes      |
 | env        |                          | `sandbox` or `live`                                                                     | Yes      |
 | apiVersion | v1                       | `v0` or `v1`                                                                            | No       |
-| baseUrl    | https://api.zabo.com     | API url                                                                                 | No       |
-| connectUrl | https://connect.zabo.com | Connect Widget URL                                                                      | No       |
 
 ### zabo.connect() parameters (Optional)
 | Param        | Default                  | Description                              | Required |
@@ -59,7 +77,7 @@ zabo-sdk-react-native uses websocket to receive the connection success or connec
 | redirect_uri |                          | Url to be redirected after login success | No       |
 | origin       | zabo-sdk-react-native    | Identification of connection origin      | No       |
 
-## Usage
+### Example
 ```JS
 import React, { useEffect, useState } from 'react'
 import { SafeAreaView, StyleSheet, ScrollView, View, Text, TouchableOpacity } from 'react-native'
@@ -132,7 +150,6 @@ export default App
 ```
 
 ### After connecting
-After a user connects, the client SDK can be used for the connected wallet:
 ```js
 zabo.transactions.getList({ ticker: 'ETH' }).then(history => {
   console.log(history)
@@ -141,35 +158,6 @@ zabo.transactions.getList({ ticker: 'ETH' }).then(history => {
   console.error(error)
 })
 ```
-Or you can send the account to your server for the server-side SDK to create a unique user:
-```js
-zabo.connect().onConnection(account => {
-  sendToYourServer(account)
-}).onError(error => {
-  console.error('account connection error:', error.message)
-})
-```
-
-Then in your server
-```js
-const Zabo = require('zabo-sdk-js')
-let account = accountReceivedFromTheClient
-
-Zabo.init({
-  apiKey: 'YourPublicAPIKeyGeneratedInYourZaboDotComDashboard',
-  secretKey: 'YourSecretAPIKey',
-  env: 'sandbox'
-}).then(zabo => {
-  zabo.users.create(account)
-}).catch(e => {
-  console.log(e.message)
-})
-```
-
-
-
-### Server vs Client
-The SDK can be used in either the client or server environment after a user connects their wallet, however, they have different functions available to them and utilize different authentication methods. See [the Zabo API docs](https://zabo.com/docs) for more information.
 
 ### Using Promises
 Every method returns a chainable promise which can be used:
