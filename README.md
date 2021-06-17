@@ -45,8 +45,10 @@ It supports [Chrome Custom Tabs](https://developer.chrome.com/docs/android/custo
 
 Some extra configuration are necessary:
 
-### Configure Android Launch Mode
+### Configure Android Launch Mode (REQUIRED)
 Configure Application launch mode as single task:
+
+AndroidManifest.xml
 ```XML
 <application
   ...
@@ -55,12 +57,59 @@ Configure Application launch mode as single task:
 </application>
 ```
 
-### Configure Deep Linking
+### Configure Deep Linking (RECOMMENDED)
 zabo-sdk-react-native uses websocket to receive the connection success or connection error callbacks in the app. You can configure a custom link scheme to your app in order to have a better user experience.
 
-**1. Enable Deep Linking:** Follow the instructions at [React Native Linking](https://reactnative.dev/docs/linking#enabling-deep-links) documentation. You can create any scheme you desire. We are using `zabo-app`in our examples.
+**1. Enable Deep Linking in your app:** 
+Follow the instructions at [React Native Linking](https://reactnative.dev/docs/linking#enabling-deep-links) documentation. You can create any scheme you desire. We are using `zabo-app`in our examples.
 
-**2. Configure Redirect URI:** On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console:
+**iOS example:**
+AppDelegate.m
+```objectivec
+#import <React/RCTLinkingManager.h>
+
+- (BOOL)application:(UIApplication *)application
+   openURL:(NSURL *)url
+   options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+  return [RCTLinkingManager application:application openURL:url options:options];
+}
+```
+
+Info.plist
+```XML
+<key>CFBundleURLTypes</key>
+<array>
+  <dict>
+    <key>CFBundleTypeRole</key>
+    <string>Editor</string>
+    <key>CFBundleURLName</key>
+    <string>com.myApp</string>
+    <key>CFBundleURLSchemes</key>
+    <array>
+      <string>zabo-app</string>
+    </array>
+  </dict>
+</array>
+```
+
+**Android example:**
+AndroidManifest.xml
+```XML
+<activity>
+  ...
+  <intent-filter>
+    <action android:name="android.intent.action.VIEW" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="zabo-app" android:host="connected" android:pathPrefix="" />
+  </intent-filter>
+<activity>
+```
+
+
+**2. Configure Redirect URI:** 
+On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console:
 ![Redirect URI](https://zabo.com/docs/images/query-param-example.png)
 
 ## Usage
@@ -93,8 +142,6 @@ const App = () => {
       try {
         await Zabo.init({
           clientId: 'YOUR_CLIENT_ID',
-          baseUrl: 'https://api.zabo.com',
-          connectUrl: 'https://connect.zabo.com',
           env: 'sandbox',
           apiVersion: 'v1'
         })
@@ -111,8 +158,8 @@ const App = () => {
   const handleConnect = () => {
     const zabo = Zabo.instance
     const params = {
-      redirect_uri: 'zabo-app://connected', // OPTIONAL
-      origin: 'zabo-app'                    // OPTIONAL
+      redirect_uri: 'zabo-app://connected', // RECOMMENDED
+      origin: 'zabo-app'                    // RECOMMENDED
     }
     zabo.connect({ params }).onConnection(account => {
       setOutput(`CONNECTED!\nACCOUNT:\n${JSON.stringify(account)}`)
