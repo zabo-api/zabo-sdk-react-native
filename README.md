@@ -110,7 +110,7 @@ AndroidManifest.xml
 
 **2. Configure Redirect URI:** 
 On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console:
-![Redirect URI](https://zabo.com/docs/images/query-param-example.png)
+![Redirect URI](example/img/set-redirect-uri.png)
 
 ## Usage
 ### Zabo.init() parameters
