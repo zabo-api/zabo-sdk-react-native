@@ -61,7 +61,7 @@ AndroidManifest.xml
 zabo-sdk-react-native uses websocket to receive the connection success or connection error callbacks in the app. You can configure a custom link scheme to your app in order to have a better user experience.
 
 **1. Enable Deep Linking in your app:** 
-Follow the instructions at [React Native Linking](https://reactnative.dev/docs/linking#enabling-deep-links) documentation. You can create any scheme you desire. We are using `zabo-app`in our examples.
+Follow the instructions at [React Native Linking](https://reactnative.dev/docs/linking#enabling-deep-links) documentation. **You can create your own url scheme.** We are using `zabo-app`in our examples.
 
 **iOS example:**
 AppDelegate.m
@@ -109,7 +109,7 @@ AndroidManifest.xml
 
 
 **2. Configure Redirect URI:** 
-On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console:
+On login success, the Connect Widget will call back the redirect URI `zabo-app://connected` with the account data. In this case, you should configure this redirect URI in your account on Zabo console: Team Settings -> Developer Settings -> HTTP Redirects tab
 ![Redirect URI](example/img/set-redirect-uri.png)
 
 ## Usage
